@@ -1,0 +1,40 @@
+#include "DAC06.h"
+
+#define BASE 0x320
+#define SIZE 12
+
+void EmbeddedDevice::DAC06::analogOutputRaw(uint8_t channel, uint16_t value)
+{
+	if (EmbeddedOperations::ioperm(BASE, SIZE, 1) != 0) {
+		std::cout << "Permission failed accessing DAC06!" << std::endl;
+		exit(1);
+	}
+
+	int channelAddr = 2 * channel;
+	uint8_t lowByte = value & 0xFF;
+	uint8_t highByte = (value >> 8) & 0x0F;
+	EmbeddedOperations::outb(lowByte, BASE + channelAddr);
+	EmbeddedOperations::outb(highByte, BASE + channelAddr + 1);
+	return;
+}
+
+void EmbeddedDevice::DAC06::analogOutputVoltage(uint8_t channel, double desired_voltage)
+{
+	if (EmbeddedOperations::ioperm(BASE, SIZE, 1) != 0) {
+		std::cout << "Permission failed accessing DAC06!" << std::endl;
+		exit(1);
+	}
+
+	if ((desired_voltage > 5) || (desired_voltage < -5)) {
+		std::cout << "Voltage out of range! Input between -5 and 5!" << std::endl;
+		exit(1);
+	}
+	
+	int channelAddr = 2 * channel;
+	uint16_t voltage = (819 / (2 * desired_voltage)) + (4095 / 2);
+	uint8_t lowByte = voltage & 0xFF;
+	uint8_t highByte = (voltage >> 8) & 0x0F;
+	EmbeddedOperations::outb(lowByte, BASE + channelAddr);
+	EmbeddedOperations::outb(highByte, BASE + channelAddr + 1);
+	return;
+}
