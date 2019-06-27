@@ -4,6 +4,7 @@
 #include <stdint.h>
 //#include <sys/io.h>
 #include "EmbeddedOperations.h"
+#include <iostream>
 
 /*
  * For MTRN3500 Students - These methods and their respective signatures must not be changed. If 

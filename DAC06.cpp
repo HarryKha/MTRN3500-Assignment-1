@@ -5,20 +5,23 @@
 
 EmbeddedDevice::DAC06::DAC06(EmbeddedOperations* eops, uint32_t base_addr)
 {
+	if (eops->ioperm(base_addr, SIZE, 1) != 0) {
+		std::cout << "Permission failed accessing DAC06!" << std::endl;
+		exit(1);
+	}
+
 	this->eops = eops;
 	this->base_addr = base_addr;
 }
 
 EmbeddedDevice::DAC06::~DAC06()
 {
+	this->base_addr = NULL;
+	this->eops = NULL;
 }
 
 void EmbeddedDevice::DAC06::analogOutputRaw(uint8_t channel, uint16_t value)
 {
-	if (eops->ioperm(base_addr, SIZE, 1) != 0) {
-		std::cout << "Permission failed accessing DAC06!" << std::endl;
-		exit(1);
-	}
 
 	int channelAddr = 2 * channel;
 	uint8_t lowByte = value & 0xFF;
@@ -28,12 +31,8 @@ void EmbeddedDevice::DAC06::analogOutputRaw(uint8_t channel, uint16_t value)
 	return;
 }
 
-void EmbeddedDevice::DAC06::analogOutputVoltage(uint8_t channel, double desired_voltage)
+void EmbeddedDevice::DAC06::analogOutputVoltage(uint8_t channel, double desired_voltage)//need to test
 {
-	if (eops->ioperm(base_addr, SIZE, 1) != 0) {
-		std::cout << "Permission failed accessing DAC06!" << std::endl;
-		exit(1);
-	}
 
 	if ((desired_voltage > 5) || (desired_voltage < -5)) {
 		std::cout << "Voltage out of range! Input between -5 and 5!" << std::endl;

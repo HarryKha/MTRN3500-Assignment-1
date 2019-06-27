@@ -30,6 +30,7 @@ namespace EmbeddedDevice {
       void setRange(uint8_t new_analog_range);
       double analogInput(uint8_t channel) const;
       friend std::ostream& operator<<(std::ostream& output, const PCM3718& pcm) {
+		  output << "channel 0: " << pcm.analogInput(0) << "\t" << "channel 1: " << pcm.analogInput(1) << "\n";
         return output;
       }
 
