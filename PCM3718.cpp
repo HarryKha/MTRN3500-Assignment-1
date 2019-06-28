@@ -2,7 +2,7 @@
 
 //#define base_addr 0x300
 
-EmbeddedDevice::PCM3718::PCM3718(EmbeddedOperations* eops, uint32_t base_addr)
+EmbeddedDevice::PCM3718::PCM3718(EmbeddedOperations* eops, uint32_t base_addr) //Constructor
 {
 	if (eops->ioperm(base_addr, 16, 1) != 0) {
 		std::cout << "Permission failed accessing PCM3718" << std::endl;
@@ -15,7 +15,7 @@ EmbeddedDevice::PCM3718::PCM3718(EmbeddedOperations* eops, uint32_t base_addr)
 	eops->outb(analog_range, base_addr);
 }
 
-EmbeddedDevice::PCM3718::PCM3718(EmbeddedOperations* eops, uint32_t base_addr, uint8_t analog_range)
+EmbeddedDevice::PCM3718::PCM3718(EmbeddedOperations* eops, uint32_t base_addr, uint8_t analog_range) //Constructor
 {
 	if (eops->ioperm(base_addr, 16, 1) != 0) {
 		std::cout << "Permission failed accessing PCM3718" << std::endl;
@@ -28,14 +28,14 @@ EmbeddedDevice::PCM3718::PCM3718(EmbeddedOperations* eops, uint32_t base_addr, u
 	eops->outb(this->analog_range, base_addr);
 }
 
-EmbeddedDevice::PCM3718::~PCM3718()
+EmbeddedDevice::PCM3718::~PCM3718() //Destructor
 {
-	this->eops = NULL;
-	this->analog_range = NULL;
-	this->base_addr = NULL;
+	this->eops = 0;
+	this->analog_range = 0;
+	this->base_addr = 0;
 }
 
-uint16_t EmbeddedDevice::PCM3718::digitalInput()
+uint16_t EmbeddedDevice::PCM3718::digitalInput() //Returns the 16-bit value from the High Byte and Low Byte of the LEDs
 {
 
 	uint8_t highByte = eops->inb(base_addr + 0xb);
@@ -44,7 +44,7 @@ uint16_t EmbeddedDevice::PCM3718::digitalInput()
 	return Combined;
 }
 
-uint8_t EmbeddedDevice::PCM3718::digitalByteInput(bool high_byte)
+uint8_t EmbeddedDevice::PCM3718::digitalByteInput(bool high_byte) //Returns the 8-bit value of the selected byte
 {
 
 	uint8_t lowByte = eops->inb(base_addr + 0x3);
@@ -56,16 +56,16 @@ uint8_t EmbeddedDevice::PCM3718::digitalByteInput(bool high_byte)
 	return lowByte;
 }
 
-bool EmbeddedDevice::PCM3718::digitalBitInput(uint8_t bit)
+bool EmbeddedDevice::PCM3718::digitalBitInput(uint8_t bit) //Returns true if selected bit is on and false if selected bit is off
 {
 
 	uint8_t lowByte = eops->inb(base_addr + 0x3);
 	uint8_t highByte = eops->inb(base_addr + 0xb);
 	uint16_t Combined = lowByte + (highByte << 8);
-	return Combined & (1 << bit); //Double check that it has been left shifted properly
+	return Combined & (1 << bit); 
 }
 
-void EmbeddedDevice::PCM3718::digitalOutput(uint16_t value)
+void EmbeddedDevice::PCM3718::digitalOutput(uint16_t value) //Outputs the 16-bit value to the high and low byte of the LEDs
 {
 
 	uint8_t lowByte = (value & 0xFF);
@@ -75,7 +75,7 @@ void EmbeddedDevice::PCM3718::digitalOutput(uint16_t value)
 	return;
 }
 
-void EmbeddedDevice::PCM3718::digitalByteOutput(bool high_byte, uint8_t value)
+void EmbeddedDevice::PCM3718::digitalByteOutput(bool high_byte, uint8_t value) //Outputs the 8-bit value to the selected High Byte or Low Byte
 {
 
 	uint8_t lowByte = value;
@@ -88,23 +88,22 @@ void EmbeddedDevice::PCM3718::digitalByteOutput(bool high_byte, uint8_t value)
 	return;
 }
 
-void EmbeddedDevice::PCM3718::setRange(uint8_t new_analog_range)// need to test
+void EmbeddedDevice::PCM3718::setRange(uint8_t new_analog_range) //Sets the range for the Analogue to Digital Converter
 {
 
 	analog_range = new_analog_range;
-	eops->outb(new_analog_range, base_addr + 1);
 	return; 
 }
 
-double EmbeddedDevice::PCM3718::analogInput(uint8_t channel) const// need to test
+double EmbeddedDevice::PCM3718::analogInput(uint8_t channel) const //Returns the voltage of the Analogue to Digital Converter
 {
 
  	eops->outb(0, base_addr + 8);
 	eops->outb(channel | (channel << 4), base_addr + 2);
 	eops->outb(analog_range, base_addr + 1);
-	//usleep(100000); uncomment this when testing analogInput
+	//usleep(100000); //uncomment this when testing analogInput
 	eops->outb(0, base_addr);
-	while (eops->inb(base_addr + 8) & 0x80);
+	while (eops->inb(base_addr + 8) & 0x80); //Check for EOC
 
 	int lowByte = eops->inb(base_addr);
 	int highByte = eops->inb(base_addr + 1);
@@ -139,5 +138,5 @@ double EmbeddedDevice::PCM3718::analogInput(uint8_t channel) const// need to tes
 		}
 	}
 
-	return ((combined*(upperBound - lowerBound))/4095) + lowerBound;
+	return ((combined*(upperBound - lowerBound))/4095) + lowerBound; //Returned value using two point formula
 }
